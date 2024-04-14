@@ -23,7 +23,7 @@ RUN set -eux; \
         llvm-13 \
         lld-13 \
         # get a recent wine so we can run tests
-        winehq-staging \
+        winehq-stable \
         # Unpack xwin
         tar; \
     # ensure that clang/clang++ are callable directly
