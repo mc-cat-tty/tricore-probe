@@ -20,7 +20,7 @@ a docker container using the `xwin` project (to provide required header files)
 that allows you to build rust applications with the given target.
 
 ```bash
-docker build .. -f xwin.Dockerfile --tag veecle/xwin
+docker buildx build --platform linux/amd64 .. -f xwin.Dockerfile --tag veecle/xwin
 ```
 
 Note that this uses the parenting folder as the build context to prime the cargo
@@ -35,7 +35,7 @@ This folder should now contain a folder `artifacts` with two files: `ftd2xx.dll`
 and `win-daemon.exe`. You can now build the virtual environment with
 
 ```bash
-docker build . --tag veecle/flash-tricore
+docker buildx build --platform linux/amd64 . --tag veecle/flash-tricore
 ```
 
 **Note:** This repository ships a Memtool and DAS installation in a wine 
