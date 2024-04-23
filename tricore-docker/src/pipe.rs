@@ -77,7 +77,7 @@ impl DuplexPipeConnection {
 }
 
 fn make_pipe(path: &Path) {
-    log::trace!("Creating pipe at {}", path.display());
+    println!("Creating pipe at {}", path.display());
 
     let mut command = Command::new("mkfifo");
     let command = command.arg(path.display().to_string());

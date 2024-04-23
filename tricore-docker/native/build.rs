@@ -8,6 +8,7 @@ fn main() {
     let search_path = match std::env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
         "windows" => cwd.join("ftdi-source-windows-x64/Static/amd64"),
         "linux" => cwd.join("ftdi-source-linux-x64/build"),
+        "macos" => cwd.join("ftdi-source-macos-x64/build"),
         system => panic!("Not supported os {system}"),
     };
 
@@ -15,6 +16,7 @@ fn main() {
         "cargo:rustc-link-search={}",
         search_path.as_path().display()
     );
+
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
     println!("cargo:rustc-link-lib=ftd2xx");

@@ -20,7 +20,9 @@ impl FTDIClient {
             let input = pipe_for_driver.to().open();
             let output = pipe_for_driver.from().open();
             log::debug!("Starting FTDI client");
+            println!("Start handling");
             handle_client(input, output);
+            println!("Ending handling");
         });
 
         FTDIClient {
@@ -35,7 +37,7 @@ impl FTDIClient {
 }
 
 fn handle_client(input: &File, output: &File) {
-    log::trace!("Client handling started");
+    println!("Client handling started");
     #[cfg(target_os = "linux")]
     {
         let vendor = 0x058b;
@@ -45,10 +47,14 @@ fn handle_client(input: &File, output: &File) {
     }
     let mut state = LocalState::new();
     let mut handle_counter = 1;
+    println!("Before loop");
     while let Ok(request) = ciborium::de::from_reader(input) {
+        println!("Looping");
         let request: RPCRequest = request;
         let response = match request {
             RPCRequest::Close(Close { handle }) => {
+                println!("Close");
+
                 let current_handle = state.devices.get(&handle).unwrap();
                 let result = unsafe { native::FT_Close(*current_handle) };
                 let result = CommandError::from_status(result);
@@ -59,6 +65,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::DriverVersion(DriverVersion { handle }) => {
+                println!("DriverVersion");
+
                 let current_handle = state.devices.get(&handle).unwrap();
                 let mut version: u32 = 0;
                 let result = unsafe { native::FT_GetDriverVersion(*current_handle, &mut version) };
@@ -72,6 +80,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::LibraryVersion(_) => {
+                println!("LibraryVersion");
+
                 let mut version: u32 = 0;
                 let result = unsafe { native::FT_GetLibraryVersion(&mut version) };
                 let result = CommandError::from_status(result);
@@ -84,6 +94,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::Read(read) => {
+                println!("Read");
+
                 let current_handle = state.devices.get(&read.handle).unwrap();
                 let mut data = Vec::<u8>::with_capacity(read.max_data_len as usize);
                 let mut counter = read.max_data_len;
@@ -112,6 +124,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::Write(mut input) => {
+                println!("Write");
+
                 let current_handle = state.devices.get(&input.handle).unwrap();
                 let address = input.data.as_slice().as_ptr();
                 assert_eq!(address, &mut input.data.as_mut_slice()[0] as *const u8);
@@ -135,6 +149,8 @@ fn handle_client(input: &File, output: &File) {
                 response
             }
             RPCRequest::SetBitMode(t) => {
+                println!("SetBitMode");
+
                 let current_handle = state.devices.get(&t.handle).unwrap();
                 let result = unsafe { native::FT_SetBitMode(*current_handle, t.mask, t.mode) };
                 let result = CommandError::from_status(result);
@@ -145,6 +161,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::SetFlowControl(t) => {
+                println!("SetFlowControl");
+
                 let current_handle = state.devices.get(&t.handle).unwrap();
                 let result = unsafe {
                     native::FT_SetFlowControl(*current_handle, t.flow_control, t.on, t.off)
@@ -157,6 +175,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::SetLatencyTimer(t) => {
+                println!("SetLatencyTimer");
+
                 let current_handle = state.devices.get(&t.handle).unwrap();
                 let result = unsafe { native::FT_SetLatencyTimer(*current_handle, t.timer_ms) };
                 let result = CommandError::from_status(result);
@@ -167,6 +187,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::SetTimeouts(st) => {
+                println!("SetTimeouts");
+
                 let current_handle = state.devices.get(&st.handle).unwrap();
                 let result =
                     unsafe { native::FT_SetTimeouts(*current_handle, st.read_ms, st.write_ms) };
@@ -178,6 +200,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::SetChars(s) => {
+                println!("SetChars");
+
                 let current_handle = state.devices.get(&s.handle).unwrap();
                 let result = unsafe {
                     native::FT_SetChars(
@@ -196,6 +220,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::SetUSBParameters(p) => {
+                println!("SetUSBParameters");
+
                 let current_handle = state.devices.get(&p.handle).unwrap();
                 let result = unsafe {
                     native::FT_SetUSBParameters(
@@ -212,6 +238,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::QueueLength(q) => {
+                println!("QueyeLength");
+
                 let current_handle = state.devices.get(&q.handle).unwrap();
                 let mut queue_length = 0;
                 let result =
@@ -226,6 +254,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::ResetDevice(d) => {
+                println!("ResetDevice");
+
                 let current_handle = state.devices.get(&d.handle).unwrap();
                 // println!("Resetting device {:?}", current_handle);
                 let result = unsafe { native::FT_ResetDevice(*current_handle) };
@@ -237,6 +267,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::Open(r) => {
+                println!("Open");
+
                 let mut handle: FT_HANDLE = core::ptr::null_mut();
                 let result = unsafe { native::FT_Open(r.number, &mut handle) };
                 let result = CommandError::from_status(result);
@@ -254,6 +286,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::CreateDeviceInfoList(_) => {
+                println!("CreateDeviceInfoList");
+
                 let mut device: u32 = 0;
                 let result = unsafe { native::FT_CreateDeviceInfoList(&mut device) };
                 let result = CommandError::from_status(result);
@@ -269,6 +303,8 @@ fn handle_client(input: &File, output: &File) {
                 }
             }
             RPCRequest::GetDetails(GetDetails { device_index }) => {
+                println!("GetDetails");
+                
                 let mut handle: FT_HANDLE = core::ptr::null_mut();
                 let mut flags = 0;
                 let mut device_type = 0;

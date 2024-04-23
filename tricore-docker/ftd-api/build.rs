@@ -23,6 +23,10 @@ fn main() {
             let header_file = "../native/ftdi-source-linux-x64/ftd2xx.h";
             (header_file, &[][..])
         }
+        "macos" => {
+            let header_file = "../native/ftdi-source-macos-x64/ftd2xx.h";
+            (header_file, &[][..])
+        }
         system => panic!("Not supported os {system}"),
     };
 
